@@ -81,7 +81,7 @@ export default function EditingTransactionsForm  ({ transactions, onClose, onUpd
             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
               Simpan
             </button>
-            <button type="button" onClick={onClose} className="bg-gray-400 px-4 py-2 rounded">
+            <button type="button" onClick={onClose} className="bg-gray-300 px-4 py-2 rounded">
               Batal
             </button>
           </div>
