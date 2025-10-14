@@ -6,6 +6,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { BsEyeSlash } from 'react-icons/bs';
 import { doc, getDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
 
 const Login = () => {
@@ -42,8 +43,15 @@ const Login = () => {
         console.log("User data not found in Firestore")
       }
 
-    } catch {
-      console.log("Error")
+    } catch (err) {
+      console.log("Email atau Password salah", err)
+      toast.error("Email atau Password salah", {
+          position: "top-center",
+          duration: 2000,
+          iconTheme: {
+            primary: '#d80d0dff'
+          }
+        })
     }
   };
 
@@ -62,7 +70,7 @@ const Login = () => {
               placeholder='Masukkan email'
               value={email}
               onChange={(e) =>setEmail(e.target.value)}
-              className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-4' 
+              className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-4 rounded-lg' 
             />
 
             <label 
@@ -77,9 +85,9 @@ const Login = () => {
                 value={password}
                 onChange={(e) =>setPassword(e.target.value)}
                 type={visibility.password ? 'text' : 'password'} 
-                className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-4' 
+                className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-4 rounded-lg' 
               />
-              <button type='button' className='absolute right-2 top-3' onClick={() => toggleVisibility('password')}>
+              <button type='button' className='absolute right-2 top-4' onClick={() => toggleVisibility('password')}>
                 {visibility.password ? <FaEye/> : <FaEyeSlash/>}
               </button>
             </div>
@@ -88,7 +96,7 @@ const Login = () => {
                 Already have an account? {""}
                 <a href='/register' className='text-[#2C9BDC] hover:underline cursor-pointer'>Register Now</a>
             </span>
-            <button type='submit' className='font-bold text-xl text-white bg-[#26AFEF] w-fit container mx-auto px-6 py-3 rounded-xl'>Login</button>
+            <button type='submit' className='font-bold text-xl text-white bg-[#26AFEF] w-fit container mx-auto px-6 py-2 rounded-md'>Login</button>
         </form>
     </div>
   )
