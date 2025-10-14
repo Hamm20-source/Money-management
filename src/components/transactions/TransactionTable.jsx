@@ -4,10 +4,10 @@ import { database, auth } from "../../utils/Firebase";
 import { get, ref } from "firebase/database";
 import AddExpense from "./AddExpense";
 import AddIncome from "./AddIncome";
-import updateIcon from "../../assets/Prototype Money Management/UpdateIcon.png";
-import deleteIcon from "../../assets/Prototype Money Management/DeleteIcon.png";
 import EditingTransactionsForm from "./EditingTransactionsForm";
 import DeleteModal from "./DeleteModal";
+import { GrUpdate } from "react-icons/gr";
+import { BiTrash } from "react-icons/bi";
 
 // src/components/TransactionTable.jsx
 export default function TransactionTable() {
@@ -62,9 +62,9 @@ export default function TransactionTable() {
 
 
   return (
-    <div className="relative mt-10 shadow-2xl inset-shadow-2xs rounded ">
-      <div className='flex flex-col items-center justify-between gap-5 mb-10'>
-        <h1 className='font-bold text-xl'>List Transaksi</h1>
+    <div className="relative mt-10 shadow-2xl inset-shadow-2xs rounded p-0 md:p-15">
+      <div className='flex flex-col md:flex-row items-center justify-between gap-5 mb-10'>
+        <h1 className='font-bold text-xl mt-10'>List Transaksi</h1>
         <div className="flex items-center gap-4">
           <AddIncome/>
           <AddExpense/>
@@ -72,9 +72,9 @@ export default function TransactionTable() {
       </div>
 
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6 p-5 md:p-0">
         <div className={`overflow-x-auto transition-all duration-300 ${editingTransactions ? "md:w-2/3 w-full" : "w-full"}`}>
-          <table className="min-w-full text-center  rounded-lg shadow-md">
+          <table className="min-w-full text-center rounded-lg shadow-md h-64 md:h-44">
             <thead className="border-b-2 border-gray-200">
               <tr className="text-center">
                 <th className="px-4 py-2 border-b">Tanggal</th>
@@ -90,22 +90,22 @@ export default function TransactionTable() {
                 {latestTransactions.length > 0 ? (
                   latestTransactions.map((t, idx) => (
                     <tr key={idx}>
-                      <td className="border-t border-t-gray-300">{t.tanggal}</td>
-                      <td className="border-t border-t-gray-300">{t.type}</td>
-                      <td className="border-t border-t-gray-300">{t.kategori}</td>
-                      <td className={`border-t border-t-gray-300 ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
+                      <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.tanggal}</td>
+                      <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.type}</td>
+                      <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.kategori}</td>
+                      <td className={`border-t border-t-gray-300 text-xs md:text-lg  ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
                         {t.type === "Pemasukan" ? "+" : "-"} {" "}
                         Rp{(t.nominal || 0).toLocaleString("id-ID")}
                       </td>
-                      <td className="border-t border-t-gray-300">{t.catatan || "-"}</td>
-                      <td className="border-t border-t-gray-300">
+                      <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.catatan || "-"}</td>
+                      <td className="border-t border-t-gray-300 text-xs md:text-lg">
                         <button className="text center cursor-pointer" onClick={() => setEditingTransactions(t)}>
-                            <img src={updateIcon} className="w-6"/>
+                            <GrUpdate className="text-xs md:text-lg"/>
                         </button>
                       </td>
                       <td className="border-t border-t-gray-300">
                         <button className="text-center cursor-pointer" onClick={() => setTransactionToDelete(t)}>
-                            <img src={deleteIcon} className="w-6"/>
+                            <BiTrash className="text-xs md:text-xl"/>
                         </button>
                       </td>
                     </tr>
@@ -146,8 +146,8 @@ export default function TransactionTable() {
         )}
 
 
-      <div className="flex justify-center mt-10">
-        <button className="w-fit font-bold bg-[#C0C0C0] px-6 py-3 rounded-2xl shadow cursor-pointer"
+      <div className="flex justify-center">
+        <button className="w-fit font-bold bg-[#C0C0C0] px-6 py-2 m-10 rounded-2xl cursor-pointer text-md"
          onClick={() => navigate("/alltransactions")}
         >
           Lihat Semua
