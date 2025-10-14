@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { push, ref } from "firebase/database";
 import { database, auth } from "../../utils/Firebase";
-import AddingIcon from "../../assets/Prototype Money Management/Adding-Icon.png";
-import closeIcon from "../../assets/Prototype Money Management/Close.png";
-import { BiAddToQueue } from "react-icons/bi";
+import { BiAddToQueue} from "react-icons/bi";
+import { CgClose } from "react-icons/cg";
 
 export default function AddIncome() {
   const [open, setOpen] = useState(false);
@@ -69,14 +68,10 @@ export default function AddIncome() {
               className="absolute right-2 top-2"
               onClick={() => setOpen(false)}
             >
-              <img
-                src={closeIcon}
-                alt="iconclose"
-                className="w-6 cursor-pointer"
-              />
+              <CgClose/>
             </button>
 
-            <h1 className="px-5 py-3 bg-[#9BE894] rounded-lg font-bold text-xs text-center">
+            <h1 className="px-5 py-3 bg-[#9BE894] rounded-lg font-bold text-xs md:text-lg text-center">
               Tambah Pemasukan
             </h1>
 
@@ -107,7 +102,7 @@ export default function AddIncome() {
 
                 <button
                   type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 font-bold text-white w-fit px-5 py-2 rounded mx-auto"
+                  className="bg-blue-500 hover:bg-blue-600 font-bold text-white w-fit px-5 py-2 rounded mx-auto cursor-pointer"
                 >
                   Submit
                 </button>

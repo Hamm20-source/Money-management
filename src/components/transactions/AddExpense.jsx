@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { push, ref } from 'firebase/database';
 import { auth,database } from '../../utils/Firebase';
-import AddingIcon from '../../assets/Prototype Money Management/Adding-Icon.png';
-import closeIcon from '../../assets/Prototype Money Management/Close.png';
-import { BiAddToQueue } from 'react-icons/bi';
+import { BiAddToQueue} from 'react-icons/bi';
+import { CgClose } from 'react-icons/cg';
 
 export default function AddExpense ()  {
     const [openModal, setOpenModal] = useState(false);
@@ -67,10 +66,10 @@ export default function AddExpense ()  {
                     <div className='relative bg-white px-10 py-8 border rounded-lg w-[400px] '>
 
                         <button className='absolute right-2 top-2'>
-                            <img src={closeIcon} alt='iconclose' className='w-6 cursor-pointer' onClick={() => setOpenModal(false)}/>
+                            <CgClose className='w-6 cursor-pointer' onClick={() => setOpenModal(false)}/>
                         </button>
 
-                        <h1 className='px-5 py-3 bg-[#F6ABAB] rounded-lg font-bold text-md text-center'>
+                        <h1 className='px-5 py-3 bg-[#F6ABAB] rounded-lg font-bold text-xs md:text-lg text-center'>
                             Tambah Pengeluaran
                         </h1>
                         
