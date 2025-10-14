@@ -5,6 +5,7 @@ import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -29,15 +30,32 @@ const Register = () => {
 
   if (password !== confirmPassword) {
     setError("Password dan Confirm Password tidak sama!");
-    return;
-  }
-
-    try {
-      const userRef = collection(db, "users");
+    toast.error("Password dan Confirm Password tidak sama!", {
+          position: "top-center",
+          duration: 2000,
+          iconTheme: {
+            primary: '#d80d0dff'
+          },
+        });
+        return;
+      }
+      
+      try {
+        const userRef = collection(db, "users");
       const snapshot = await getDocs(userRef);
 
       if (snapshot.size >= 2) {
-        setError("Regristasi ditutup, hanya 2 user yang diperbolehkan");
+        toast.error("Regristasi ditutup, hanya 2 user yang diperbolehkan", {
+          position: "top-center",
+          duration: 2000,
+          iconTheme: {
+            primary: '#d80d0dff'
+          },
+          style: {
+            fontSize: "10px",
+            textAlign: "center"
+          }
+        });
         return;
       };
 
@@ -53,7 +71,7 @@ const Register = () => {
 
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
     }
   };
 
@@ -75,7 +93,8 @@ const Register = () => {
               type="text" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-4' 
+              placeholder='Masukkan username'
+              className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-4 rounded-lg' 
             />
 
             <label 
@@ -88,7 +107,8 @@ const Register = () => {
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-4' 
+              placeholder='Masukkan Email'
+              className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-4 rounded-lg' 
             />
 
             <label 
@@ -102,7 +122,8 @@ const Register = () => {
                 type={visibility.password ? "text" : "password"} 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-4' 
+                placeholder='Masukkan Password'
+                className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-4 rounded-lg' 
               />
               <button type="button" className='absolute right-2 top-3' onClick={() => toggleVisibility("password")}>
                 {visibility.password ? <FaEye/> : <FaEyeSlash/>}
@@ -120,7 +141,8 @@ const Register = () => {
                 type={visibility.confirm ? "text" : "password"} 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className='w-80 py-2 border-2 border-gray-300 shadow-md outline-none mb-2' 
+                placeholder='Masukkan Confirm Password'
+                className='w-80 p-2 border-2 border-gray-300 shadow-md outline-none mb-2 rounded-lg' 
               />
                 <button type="button" className='absolute right-2 top-3' onClick={() => toggleVisibility("confirm")}>
                 {visibility.confirm ? <FaEye/> : <FaEyeSlash/>}
@@ -131,7 +153,7 @@ const Register = () => {
               Already have an account? {""}
               <a href='/login' className='text-[#2C9BDC] hover:underline cursor-pointer'>Login Now</a>
             </span>
-            <button type='submit' className='font-bold text-xl text-white bg-[#26AFEF] w-fit container mx-auto px-6 py-3 rounded-xl'>Register</button>
+            <button type='submit' className='font-bold text-xl text-white bg-[#26AFEF] w-fit container mx-auto px-6 py-2 rounded-md'>Register</button>
         </form>
     </div>
   )
