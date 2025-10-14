@@ -10,13 +10,13 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDkK38diMpaSw9bL3G2SkPVDk9gk45Jy2A",
-  authDomain: "moneymanagement-user.firebaseapp.com",
-  projectId: "moneymanagement-user",
-  storageBucket: "moneymanagement-user.firebasestorage.app",
-  messagingSenderId: "780360383116",
-  appId: "1:780360383116:web:d8a332231a1c4a53af99a9",
-  databaseURL: "https://moneymanagement-user-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
 };
 
 // Initialize Firebase
