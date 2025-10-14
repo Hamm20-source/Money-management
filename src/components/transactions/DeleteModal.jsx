@@ -27,15 +27,14 @@ export default function DeleteModal({ transactionsDelete, onClose, onDeleted }) 
     };
 
   return (
-    <div className='w-full z-50'>
-      <div className='absolute right-0 top-0 bg-white shadow-lg h-30 p-2 rounded-lg space-y-4'>
+      <div className='absolute flex flex-col justify-center items-center w-fit right-10 top-10 bg-white shadow-lg rounded-lg space-y-4 p-2'>
         <h1 className='font-bold'>Yakin mau hapus transaksi ini?</h1>
         <div className='flex justify-center items-center gap-5'>
           <button className='bg-red-500 px-4 py-2 text-white font-medium cursor-pointer' onClick={handleDelete}>Ya</button>
           <button className='cursor-pointer' onClick={onClose}>Batal</button>
         </div>
       </div>
-    </div>
+    
   )
 };
 
