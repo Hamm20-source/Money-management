@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { auth, database } from '../../utils/Firebase';
 import { get, ref } from 'firebase/database';
-import updateIcon from "../../assets/Prototype Money Management/UpdateIcon.png";
-import deleteIcon from "../../assets/Prototype Money Management/DeleteIcon.png";
 import EditingTransactionsForm from "./EditingTransactionsForm";
 import DeleteModal from "./DeleteModal";
 import TransactionsFilter from '../filter/TransactionsFilter';
 import { onAuthStateChanged } from 'firebase/auth';
+import { GrUpdate } from 'react-icons/gr';
+import { BiTrash } from 'react-icons/bi';
 
 
 export default function AllTransactionsTable() {
@@ -53,28 +53,25 @@ export default function AllTransactionsTable() {
             alltransactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
             alltransactions = alltransactions.filter((t) => {
               const date = new Date(t.tanggal);
+              let isMatch = true;
               
               if (filter.type === "today") {
                 const today = new Date();
-                return (
+                isMatch =
                   date.getDate() === today.getDate() &&
                   date.getMonth() === today.getMonth() &&
                   date.getFullYear() === today.getFullYear()
-                );
-              }
-              if (filter.type === "month") {
-                return (
+              } else if (filter.type === "month") {
+                isMatch =
                   date.getMonth() === filter.month &&
                   date.getFullYear() === filter.year 
-                )
-              }
-              if (filter.type === "year") {
-                  return date.getFullYear() === filter.year;
+              } else if (filter.type === "year") {
+                  isMatch = date.getFullYear() === filter.year;
               }
               if (filter.transactionsType !== "all") {
-                return t.type === filter.transactionsType
+                isMatch = isMatch && t.type === filter.transactionsType
               }
-              return true;
+              return isMatch;
             });
   
             setTransactions(alltransactions)
@@ -100,42 +97,47 @@ export default function AllTransactionsTable() {
     }
 
   return (
-    <div className='p-0 md:p-20'> 
+    <div className='relative p-5 md:p-20 z-0'> 
       <h1 className='font-bold text-xl mb-10'>Semua Transaksi</h1>
 
       <TransactionsFilter filter={filter} setFilter={setFilter}/>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6 p-5 md:p-2">
             <div className={`overflow-x-auto transition-all duration-300 ${editingTransactions ? "md:w-2/3 w-full" : "w-full"}`}>
-              <table className="min-w-full text-center  rounded-lg border border-gray-300 shadow-md">
-                <thead className="border-2 border-gray-200">
-                  <tr className="bg-[#6f94e4] text-white text-center">
-                    <th className="px-4 py-2 border">Tanggal</th>
-                    <th className="px-4 py-2 border">Tipe</th>
-                    <th className="px-4 py-2 border">Kategori</th>
-                    <th className="px-4 py-2 border">Nominal</th>
-                    <th className="px-4 py-2 border">Catatan</th>
-                    <th className="px-4 py-2 border">Update</th>
-                    <th className="px-4 py-2 border">Delete</th> 
+              <table className="min-w-full text-center  rounded-lg h-64 md:44 shadow-md ">
+                <thead className="border-b-2 border-gray-200">
+                  <tr className="text-center">
+                    <th className="px-4 py-2 border-b">No</th>
+                    <th className="px-4 py-2 border-b">Tanggal</th>
+                    <th className="px-4 py-2 border-b">Tipe</th>
+                    <th className="px-4 py-2 border-b">Kategori</th>
+                    <th className="px-4 py-2 border-b">Nominal</th>
+                    <th className="px-4 py-2 border-b">Catatan</th>
+                    <th className="px-4 py-2 border-b">Update</th>
+                    <th className="px-4 py-2 border-b">Delete</th> 
                   </tr>
                 </thead>
                 <tbody>
                     {transactions.length > 0 ? (
-                      transactions.map((t) => (
+                      transactions.map((t, index) => (
                         <tr key={t.id}>
-                          <td className="border-t border-r border-r-gray-300">{t.tanggal}</td>
-                          <td className="border-t border-r border-r-gray-300">{t.type}</td>
-                          <td className="border-t border-r border-r-gray-300">{t.kategori}</td>
-                          <td className="border-t border-r border-r-gray-300">{(t.nominal || 0).toLocaleString("id-ID")}</td>
-                          <td className="border-t border-r border-r-gray-300">{t.catatan || "-"}</td>
-                          <td className="border-t border-r border-r-gray-300">
+                          <td className="border  border-gray-300 text-xs md:text-lg">{index + 1}</td>
+                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.tanggal}</td>
+                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.type}</td>
+                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.kategori}</td>
+                          <td className={`border-t border-t-gray-300 text-xs md:text-lg ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
+                            {t.type === "Pemasukan" ? "+" : "-"} {" "}
+                            {(t.nominal || 0).toLocaleString("id-ID")}
+                          </td>
+                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.catatan || "-"}</td>
+                          <td className="border-t border-t-gray-300 text-xs md:text-lg">
                             <button className="text center cursor-pointer" onClick={() => setEditingTransactions(t)}>
-                                <img src={updateIcon} className="w-6"/>
+                                <GrUpdate className='text-xs md:text-lg'/>
                             </button>
                           </td>
-                          <td className="border-t">
+                          <td className="border-t border-r border -gray-300 ">
                             <button className="text-center cursor-pointer" onClick={() => setTransactionsDelete(t)}>
-                                <img src={deleteIcon} className="w-6"/>
+                               <BiTrash className='text-xs md:text-xl'/>
                             </button>
                           </td>
                         </tr>
