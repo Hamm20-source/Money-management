@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 import { ref, get } from "firebase/database";
+import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,6 +24,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const database = getDatabase(app);
+const storage = getStorage(app);
 
 // Fetch GridTransactions
 export async function fetchIncome(uid) {
@@ -75,4 +77,4 @@ export async function getUserByEmail(email) {
   }
 };
 
-export {auth, db, database}
+export {auth, db, database, storage}
