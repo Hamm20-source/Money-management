@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { CgClose } from 'react-icons/cg';
 import { GiHamburgerMenu } from 'react-icons/gi';
@@ -35,7 +35,9 @@ export default function Sidebar() {
                         <button onClick={() => setOpen(false)} className='cursor-pointer'>
                             <CgClose className='text-xl '/>
                         </button>
-                        <img src={Logo} alt="logo" className='w-15' />
+                        <Link to="/">
+                           <img src={Logo} alt="logo" className='w-15' />
+                        </Link>
                     </div>
                     <div className='mt-10 flex flex-col space-y-5'>
                         <span>Halo {userData?.username} 👐</span>
