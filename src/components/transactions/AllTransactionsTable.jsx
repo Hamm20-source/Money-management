@@ -7,6 +7,7 @@ import TransactionsFilter from '../filter/TransactionsFilter';
 import { onAuthStateChanged } from 'firebase/auth';
 import { GrUpdate } from 'react-icons/gr';
 import { BiTrash } from 'react-icons/bi';
+import Pagination from '../filter/Pagination';
 
 
 export default function AllTransactionsTable() {
@@ -20,6 +21,16 @@ export default function AllTransactionsTable() {
     transactionsType: "all"
    });
    const [loading, setLoading] = useState(true);
+   const [currentPage, setCurrentPage] = useState(1);
+   const transactionsPerPage = 20;
+
+   const indefOfLastTransactions = currentPage * transactionsPerPage;
+   const indexOfFirstTransactions = indefOfLastTransactions - transactionsPerPage;
+   const currentTransactions = transactions.slice(indexOfFirstTransactions, indefOfLastTransactions);
+
+   const totalPages = Math.ceil(transactions.length / transactionsPerPage)
+   const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+   const goToPrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
   useEffect(() => {
     const fetchData =  onAuthStateChanged(auth, async (user) => {
@@ -118,24 +129,24 @@ export default function AllTransactionsTable() {
                   </tr>
                 </thead>
                 <tbody>
-                    {transactions.length > 0 ? (
-                      transactions.map((t, index) => (
+                    {currentTransactions.length > 0 ? (
+                      currentTransactions.map((t, index) => (
                         <tr key={t.id}>
-                          <td className="border  border-gray-300 text-xs md:text-lg">{index + 1}</td>
-                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.tanggal}</td>
-                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.type}</td>
-                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.kategori}</td>
-                          <td className={`border-t border-t-gray-300 text-xs md:text-lg ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
+                          <td className="border  border-gray-300 text-xs md:text-lg">{indexOfFirstTransactions + index + 1}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.tanggal}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.type}</td>
+                          <td className="border-t border-b border-b-gray-300 text-xs md:text-lg">{t.kategori}</td>
+                          <td className={`border-t border-b border-gray-300 text-xs md:text-lg ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
                             {t.type === "Pemasukan" ? "+" : "-"} {" "}
                             {(t.nominal || 0).toLocaleString("id-ID")}
                           </td>
-                          <td className="border-t border-t-gray-300 text-xs md:text-lg">{t.catatan || "-"}</td>
-                          <td className="border-t border-t-gray-300 text-xs md:text-lg">
+                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.catatan || "-"}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">
                             <button className="text center cursor-pointer" onClick={() => setEditingTransactions(t)}>
                                 <GrUpdate className='text-xs md:text-lg'/>
                             </button>
                           </td>
-                          <td className="border-t border-r border -gray-300 ">
+                          <td className="border-t border-r border-b border-gray-300 ">
                             <button className="text-center cursor-pointer" onClick={() => setTransactionsDelete(t)}>
                                <BiTrash className='text-xs md:text-xl'/>
                             </button>
@@ -176,7 +187,15 @@ export default function AllTransactionsTable() {
                   }}
                 />
             )}
-    
+            
+            {transactions.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onNext={goToNextPage}
+                onPrev={goToPrevPage}
+              />
+            )}
     </div>
   )
 };
