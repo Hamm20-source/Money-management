@@ -1,12 +1,40 @@
-# React + Vite
+📘 README – Realtime Update pada Money Management App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🧩 Deskripsi Singkat
+Aplikasi ini menggunakan React + Firebase Realtime Database untuk mencatat dan menampilkan transaksi keuangan. 
+Fitur utama yang dijelaskan di sini adalah sinkronisasi otomatis (realtime) antara penambahan transaksi (AddIncome) dan tabel daftar transaksi (AllTransactionsTable).
 
-Currently, two official plugins are available:
+⚙️ Struktur Utama Komponen
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. AddIncome.jsx
+Komponen ini berfungsi untuk menambahkan data pemasukan baru ke Firebase.
 
-## Expanding the ESLint configuration
+- Mengambil user aktif dari auth.currentUser.
+- Menggunakan fungsi push() untuk menulis data baru ke path:
+  transactions/{user.uid}/income
+- Setelah data berhasil ditambahkan, Firebase akan mengirimkan sinyal update ke semua listener aktif.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. AllTransactionsTable.jsx
+Komponen ini menampilkan seluruh transaksi user (baik pemasukan maupun pengeluaran).
+------------------------------------------------------
+
+🔄 Alur Realtime Update
+1. User mengisi form pada AddIncome dan klik Submit.
+2. Fungsi push() menambahkan data baru ke Firebase Realtime Database.
+3. Firebase mendeteksi adanya data baru dan memicu event onValue() pada AllTransactionsTable.
+4. AllTransactionsTable otomatis menerima snapshot terbaru dan melakukan setTransactions() untuk memperbarui tampilan.
+5. Hasil: data baru muncul langsung tanpa perlu refresh halaman.
+
+📦 Dependensi yang Digunakan
+- React
+- Firebase v9 Modular SDK
+- react-icons
+- TailwindCSS
+
+✅ Tips Tambahan
+- Gunakan onValue() hanya saat data memang perlu realtime.
+- Gunakan get() untuk data statis.
+- Jangan lupa membersihkan listener dengan return () => listener(); agar tidak ada memori bocor.
+
+👨‍💻 Penulis
+Dikembangkan sebagai bagian dari proyek Money Management App — sistem pencatatan keuangan dengan fitur login, filter transaksi, edit, dan penghapusan data.
