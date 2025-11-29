@@ -151,7 +151,7 @@ const Register = () => {
 
             <span className='font-semibold text-xs text-center mb-5'>
               Already have an account? {""}
-              <a href='/login' className='text-[#2C9BDC] hover:underline cursor-pointer'>Login Now</a>
+              <link to='/login' className='text-[#2C9BDC] hover:underline cursor-pointer'>Login Now</Link>
             </span>
             <button type='submit' className='font-bold text-xl text-white bg-[#26AFEF] w-fit container mx-auto px-6 py-2 rounded-md'>Register</button>
         </form>
