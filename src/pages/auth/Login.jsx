@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import logoKasku from '../../assets/Prototype Money Management/Logo-2.png';
 import { auth, db } from '../../utils/Firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { BsEyeSlash } from 'react-icons/bs';
