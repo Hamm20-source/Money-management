@@ -32,6 +32,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const hideLayout = ["/register", "/login", "/guest", ].includes(location.pathname);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -41,6 +42,11 @@ function App() {
     })
     return () => unsub();
   }, []); 
+
+  // Ngedistrak di Halaman all Transaction Page
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  }
 
   if (loading) {
     return (
@@ -63,7 +69,11 @@ function App() {
           <Routes>
             <Route element={<ProtectedRoute/>}>
               <Route path="/" element={<Dashboard uid={uid}/>}/>
-              <Route path="/alltransactions" element={<AllTransactionsTable/>}/>
+              <Route 
+                path="/alltransactions" 
+                element={<AllTransactionsTable refreshKey={refreshKey} onRefresh={handleRefresh}/>} 
+              />
+ 
               <Route path="/profile" element={<Profile/>}/>
             </Route>
             
