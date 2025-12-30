@@ -4,7 +4,7 @@ import { auth,database } from '../../utils/Firebase';
 import { BiAddToQueue} from 'react-icons/bi';
 import { CgClose } from 'react-icons/cg';
 
-export default function AddExpense ()  {
+export default function AddExpense ({ onSuccess })  {
     const [openModal, setOpenModal] = useState(false);
     const [form, setForm] = useState({
         tanggal: "",
@@ -41,6 +41,9 @@ export default function AddExpense ()  {
                 type: "expense",
                 createdAt: Date.now()
             });
+            
+            // Untuk Mentrigger Refresh pada Si Component dashboard
+            onSuccess?.();
 
             alert("Expense berhasil ditambahkan");
             setForm({ tanggal: "", kategori: "", nominal: "", catatan: "" });
@@ -55,7 +58,7 @@ export default function AddExpense ()  {
         <div>
             <button 
                 onClick={() =>setOpenModal(true)}
-                className='flex items-center gap-1 bg-red-400 p-2 text-white rounded-xl'
+                className='flex items-center gap-1 bg-red-500 p-2 text-white rounded-xl'
             >
                 <BiAddToQueue className='text-md'/>
                 <span className='font-semibold text-xs md:text-md whitespace-nowrap'>Tambah Pengeluaran</span>
