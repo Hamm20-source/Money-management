@@ -4,13 +4,15 @@ import { get, ref } from 'firebase/database';
 import EditingTransactionsForm from "./EditingTransactionsForm";
 import DeleteModal from "./DeleteModal";
 import TransactionsFilter from '../filter/TransactionsFilter';
-import { onAuthStateChanged } from 'firebase/auth';
+import ExportExcel from '../../features/exportexcel/ExportExcel';
+import Pagination from '../filter/Pagination';
+import AddIncome from './AddIncome';
+import AddExpense from './AddExpense';
 import { GrUpdate } from 'react-icons/gr';
 import { BiTrash } from 'react-icons/bi';
-import Pagination from '../filter/Pagination';
 
 
-export default function AllTransactionsTable() {
+export default function AllTransactionsTable({ refreshKey, onRefresh }) {
   const [transactions, setTransactions] = useState([]);
   const [editingTransactions, setEditingTransactions] = useState(null);
   const [transactionDelete, setTransactionsDelete] = useState(null);
@@ -33,70 +35,84 @@ export default function AllTransactionsTable() {
    const goToPrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
   useEffect(() => {
-    const fetchData =  onAuthStateChanged(auth, async (user) => {
-       if (!user) {
-        setLoading(false);
+    const fetchTransactions = async () => {
+      const user = auth.currentUser;
+
+      if (!user) {
         setTransactions([]);
+        setLoading(false);
         return;
       }
-      try {
-        setLoading(true)
-        const snapshot = await get(ref(database, `transactions/${user.uid}`));
 
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-  
-            const incomeData = data.income 
+      setLoading(true);
+      try {
+        const snapshot = await get(
+          ref(database, `transactions/${user.uid}`)
+        );
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          const incomeData = data.income
             ? Object.entries(data.income).map(([key, item]) => ({
-              ...item,
-              id: key,
-              type: "Pemasukan"
-            })) : [];
-  
-            const expenseData = data.expense
+                ...item,
+                id: key,
+                type: "Pemasukan",
+              }))
+            : [];
+
+          const expenseData = data.expense
             ? Object.entries(data.expense).map(([key, item]) => ({
-              ...item,
-              id: key,
-              type: "Pengeluaran"
-            })) : [];
-  
-            let alltransactions = [...incomeData, ...expenseData];
-            alltransactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            alltransactions = alltransactions.filter((t) => {
-              const date = new Date(t.tanggal);
-              let isMatch = true;
-              
-              if (filter.type === "today") {
-                const today = new Date();
-                isMatch =
-                  date.getDate() === today.getDate() &&
-                  date.getMonth() === today.getMonth() &&
-                  date.getFullYear() === today.getFullYear()
-              } else if (filter.type === "month") {
-                isMatch =
-                  date.getMonth() === filter.month &&
-                  date.getFullYear() === filter.year 
-              } else if (filter.type === "year") {
-                  isMatch = date.getFullYear() === filter.year;
-              }
-              if (filter.transactionsType !== "all") {
-                isMatch = isMatch && t.type === filter.transactionsType
-              }
-              return isMatch;
-            });
-  
-            setTransactions(alltransactions)
-          } else {
-            setTransactions([]);
-          }
-      } catch (error) {
-        console.error("Error Fetching transactions", error)
+                ...item,
+                id: key,
+                type: "Pengeluaran",
+              }))
+            : [];
+
+          let all = [...incomeData, ...expenseData];
+
+          all.sort(
+            (a, b) => new Date(b.tanggal) - new Date(a.tanggal)
+          );
+
+          all = all.filter((t) => {
+            const date = new Date(t.tanggal);
+            let isMatch = true;
+
+            if (filter.type === "today") {
+              const today = new Date();
+              isMatch =
+                date.getDate() === today.getDate() &&
+                date.getMonth() === today.getMonth() &&
+                date.getFullYear() === today.getFullYear();
+            } else if (filter.type === "month") {
+              isMatch =
+                date.getMonth() === filter.month &&
+                date.getFullYear() === filter.year;
+            } else if (filter.type === "year") {
+              isMatch = date.getFullYear() === filter.year;
+            }
+
+            if (filter.transactionsType !== "all") {
+              isMatch = isMatch && t.type === filter.transactionsType;
+            }
+
+            return isMatch;
+          });
+
+          setTransactions(all);
+        } else {
+          setTransactions([]);
+        }
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
       } finally {
         setLoading(false);
-      };
-    });
-    return () => fetchData()
-  }, [filter]);
+      }
+    };
+
+    fetchTransactions();
+  }, [filter, refreshKey]);
 
 
   if (loading) {
@@ -106,16 +122,23 @@ export default function AllTransactionsTable() {
         </div>
       );
     }
-
+ 
   return (
-    <div className='relative p-5 md:p-20 z-0'> 
+    <div className='p-5 md:p-20 z-0'> 
       <h1 className='font-bold text-xl mb-10'>Semua Transaksi</h1>
 
-      <TransactionsFilter filter={filter} setFilter={setFilter}/>
+      <div className='flex justify-between items-center mb-4'>
+        <TransactionsFilter filter={filter} setFilter={setFilter}/>
+          <div className='flex items-center gap-4'>
+            <AddIncome onSuccess={onRefresh}/>
+            <AddExpense onSuccess={onRefresh}/>
+            <ExportExcel transactions={transactions} filter={filter}/>
+          </div>
+      </div>
 
       <div className="flex flex-col md:flex-row gap-6 p-5 md:p-2">
-            <div className={`overflow-x-auto transition-all duration-300 ${editingTransactions ? "md:w-2/3 w-full" : "w-full"}`}>
-              <table className="min-w-full text-center  rounded-lg h-64 md:44 shadow-md ">
+            <div className={`overflow-x-auto transition-all duration-300 ${editingTransactions || transactionDelete ? "md:w-2/3 w-full" : "w-full"}`}>
+              <table className="min-w-full text-center rounded-lg h-64 md:44 shadow-md ">
                 <thead className="border-b-2 border-gray-200">
                   <tr className="text-center">
                     <th className="px-4 py-2 border-b">No</th>
@@ -132,23 +155,23 @@ export default function AllTransactionsTable() {
                     {currentTransactions.length > 0 ? (
                       currentTransactions.map((t, index) => (
                         <tr key={t.id}>
-                          <td className="border  border-gray-300 text-xs md:text-lg">{indexOfFirstTransactions + index + 1}</td>
-                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.tanggal}</td>
-                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.type}</td>
-                          <td className="border-t border-b border-b-gray-300 text-xs md:text-lg">{t.kategori}</td>
-                          <td className={`border-t border-b border-gray-300 text-xs md:text-lg ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
+                          <td className="border border-gray-300 text-xs md:text-sm">{indexOfFirstTransactions + index + 1}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-sm">{t.tanggal}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-sm">{t.type}</td>
+                          <td className="border-t border-b border-b-gray-300 text-xs md:text-sm">{t.kategori}</td>
+                          <td className={`border-t border-b border-gray-300 text-xs md:text-sm ${t.type === "Pemasukan" ? "text-green-500" : "text-red-500"}`}>
                             {t.type === "Pemasukan" ? "+" : "-"} {" "}
                             {(t.nominal || 0).toLocaleString("id-ID")}
                           </td>
-                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">{t.catatan || "-"}</td>
-                          <td className="border-t border-b border-gray-300 text-xs md:text-lg">
+                          <td className="border-t border-b border-gray-300 text-xs md:text-sm">{t.catatan || "-"}</td>
+                          <td className="border-t border-b border-gray-300 text-xs md:text-sm">
                             <button className="text center cursor-pointer" onClick={() => setEditingTransactions(t)}>
-                                <GrUpdate className='text-xs md:text-lg'/>
+                                <GrUpdate className='text-xs md:text-sm'/>
                             </button>
                           </td>
                           <td className="border-t border-r border-b border-gray-300 ">
                             <button className="text-center cursor-pointer" onClick={() => setTransactionsDelete(t)}>
-                               <BiTrash className='text-xs md:text-xl'/>
+                               <BiTrash className='text-xs md:text-sm'/>
                             </button>
                           </td>
                         </tr>
@@ -163,6 +186,7 @@ export default function AllTransactionsTable() {
                 </tbody>
               </table>
             </div>
+
             {editingTransactions && (
               <div className="w-full md:w-1/3">
                 <EditingTransactionsForm
@@ -176,8 +200,9 @@ export default function AllTransactionsTable() {
                 />
               </div>
             )}
-          </div>
+
             {transactionDelete && (
+              <div className='w-full md:w-1/3'>
                 <DeleteModal
                   transactionsDelete={transactionDelete}
                   onClose={() => setTransactionsDelete(null)}
@@ -186,7 +211,10 @@ export default function AllTransactionsTable() {
                     setTransactions((prev) => prev.filter(t => t.id !== deletedId));
                   }}
                 />
+              </div>
             )}
+    
+          </div>
             
             {transactions.length > 0 && (
               <Pagination
