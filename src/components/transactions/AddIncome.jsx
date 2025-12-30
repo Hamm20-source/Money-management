@@ -4,7 +4,7 @@ import { database, auth } from "../../utils/Firebase";
 import { BiAddToQueue} from "react-icons/bi";
 import { CgClose } from "react-icons/cg";
 
-export default function AddIncome() {
+export default function AddIncome({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     tanggal: "",
@@ -42,7 +42,11 @@ export default function AddIncome() {
         createdAt: Date.now(), // biar gampang sorting nanti
       });
 
-      alert("Pemasukan berhasil ditambahkan ✅");
+
+      // Untuk Mentrigger Refresh pada Si Component dashboard
+      onSuccess?.();
+
+      alert("Pemasukan berhasil ditambahkan");
       setForm({ tanggal: "", kategori: "", nominal: "", catatan: "" });
       setOpen(false);
     } catch (error) {
@@ -55,7 +59,7 @@ export default function AddIncome() {
     
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 bg-green-400 p-2 text-white rounded-xl"
+        className="flex items-center gap-1 bg-green-500 p-2 text-white rounded-xl"
       >
         <BiAddToQueue className="text-md"/>
         <span className="font-semibold text-xs md:text-md whitespace-nowrap">Tambah Pemasukan</span>
