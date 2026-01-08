@@ -58,7 +58,7 @@ export default function AddExpense ({ onSuccess })  {
         <div>
             <button 
                 onClick={() =>setOpenModal(true)}
-                className='flex items-center gap-1 bg-red-500 p-2 text-white rounded-xl'
+                className='flex items-center gap-1 bg-red-500 border-2 border-red-500 p-2  text-white rounded-xl'
             >
                 <BiAddToQueue className='text-md'/>
                 <span className='font-semibold text-xs md:text-md whitespace-nowrap'>Tambah Pengeluaran</span>

@@ -59,7 +59,7 @@ export default function AddIncome({ onSuccess }) {
     
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 bg-green-500 p-2 text-white rounded-xl"
+        className="flex items-center gap-1 bg-green-500 border-2 border-green-500 p-2 text-white rounded-xl"
       >
         <BiAddToQueue className="text-md"/>
         <span className="font-semibold text-xs md:text-md whitespace-nowrap">Tambah Pemasukan</span>
