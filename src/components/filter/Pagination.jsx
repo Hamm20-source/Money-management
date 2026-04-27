@@ -10,7 +10,7 @@ export default function Pagination({ currentPage, totalPages, onNext, onPrev }) 
                 currentPage === 1 ?
                 "bg-gray-400 cursor-not-allowed" 
                 :
-                "bg-blue-400 cursor-pointer"
+                "bg-black cursor-pointer"
             }`}
         >
             Prev
@@ -27,7 +27,7 @@ export default function Pagination({ currentPage, totalPages, onNext, onPrev }) 
                currentPage === totalPages | totalPages === 0 ?
                 "bg-gray-400 cursor-not-allowed" 
                 :
-                "bg-blue-400 cursor-pointer"
+                "bg-black cursor-pointer"
             }`}
         >
             Next
