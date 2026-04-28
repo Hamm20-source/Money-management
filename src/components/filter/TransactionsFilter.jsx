@@ -76,8 +76,8 @@ export default function TransactionsFilter({ filter, setFilter }) {
         className='border-2 border-gray-300 text-sm font-bold p-1 rounded-lg shadow-lg outline-none'
       >
         <option value="all">Semua</option>
-        <option value="Pemasukan">Pemasukan</option>
-        <option value="Pengeluaran">Pengeluaran</option>
+        <option value="income">Pemasukan</option>
+        <option value="expense">Pengeluaran</option>
       </select>
 
     </div>
