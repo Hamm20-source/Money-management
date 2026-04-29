@@ -1,34 +1,52 @@
-import React from 'react'
-import { deleteTransactions } from '../../services/UpdateAndDelete';
 import toast from 'react-hot-toast';
+import useTransactionStore from '../../Store/UseTransactionStore';
 
-export default function DeleteModal({ transactionsDelete, onClose, onDeleted }) {
+export default function DeleteModal({ transactionsDelete, onClose }) {
+  const deleteTransaction = useTransactionStore((state) => state.deleteTransaction);
     const handleDelete = async () => {
-        const confirmDelete = window.confirm("Yakin mau hapus transaksi ini");
+       try {
+        const result = await deleteTransaction(
+          transactionsDelete.id
+        );
 
-        if (!confirmDelete) return;
-
-        await deleteTransactions(
-            transactionsDelete.type === "Pemasukan" ? "income" : "expense",
-            transactionsDelete.id
-        )
-
-        if (onDeleted) onDeleted(transactionsDelete.id)
-        console.log("Deleting:", transactionsDelete);
-        toast.success("Delete Succes", {
-          position: "top-center",
-          duration: 2000,
-          iconTheme: {
-            primary: '#d80d0dff'
-          }
-        })
-
-        onClose()
+        if (!result) {
+          toast.error("Delete Failed", {
+            position: "top-center",
+            duration: 2000,
+            iconTheme: {
+              primary: '#d80d0dff'
+            }
+          })
+          return
+        };
+        
+         toast.success("Delete Succes", {
+           position: "top-center",
+           duration: 2000,
+           iconTheme: {
+             primary: '#d80d0dff'
+           }
+         })
+ 
+         onClose()
+       } catch (error) {
+          console.error("Error deleting transaction:", error);
+          toast.error("there is an error", {
+            position: "top-center",
+            duration: 2000,
+            iconTheme: {
+              primary: '#d80d0dff'
+            }
+          })
+       }
     };
 
   return (
-      <div className='absolute flex flex-col justify-center items-center w-fit right-10 top-10 bg-white shadow-lg rounded-lg space-y-4 p-2'>
-        <h1 className='font-bold'>Yakin mau hapus transaksi ini?</h1>
+      <div className='shadow-lg p-5 mt-10 h-auto  flex flex-col justify-center items-center gap-5'>
+        <h1 className='font-medium'>Yakin mau hapus transaksi
+          {" "} 
+          <span className='font-bold'>{transactionsDelete.tanggal} / {transactionsDelete.type}</span> ?
+        </h1>
         <div className='flex justify-center items-center gap-5'>
           <button className='bg-red-500 px-4 py-2 text-white font-medium cursor-pointer' onClick={handleDelete}>Ya</button>
           <button className='cursor-pointer' onClick={onClose}>Batal</button>
