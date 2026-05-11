@@ -1,13 +1,20 @@
 import React, { useState } from 'react'
-import { updateTransactions } from '../../services/UpdateAndDelete';
-import toast, { Toaster } from 'react-hot-toast';
+import useTransactionStore from '../../Store/UseTransactionStore';
+import toast from 'react-hot-toast';
 
-export default function EditingTransactionsForm  ({ transactions, onClose, onUpdated })  {
+
+export default function EditingTransactionsForm  ({ transactions, onClose })  {
+    const updateTransactions = useTransactionStore((state) => state.updateTransaction);
     const [formData, setFormData] = useState({
         nominal: transactions.nominal || 0,
         kategori: transactions.kategori || "",
-        catatan: transactions.catatan || ""
+        catatan: transactions.catatan || "",
     });
+
+    const categoryMap = {
+        income: ["Gaji", "Bonus", "Investasi", "Hadiah", "Penjualan", "Lainnya"],
+        expense: ["Makanan", "Transportasi", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"]
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -16,7 +23,7 @@ export default function EditingTransactionsForm  ({ transactions, onClose, onUpd
           const raw = value.replace(/\./g, "");
           setFormData({
             ...formData,
-            nominal: raw ? parseInt(raw) : 0,
+            nominal: raw ? Number(raw) : 0,
           });
         } else {
           setFormData({ ...formData, [name]: value });
@@ -26,62 +33,69 @@ export default function EditingTransactionsForm  ({ transactions, onClose, onUpd
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const updatedData = {
-          ...formData,
-          id: transactions.id,
-          type: transactions.type
-        };
-
-        await updateTransactions(
-            transactions.type === "Pemasukan" ? "income" : "expense",
-            transactions.id,
-            formData
-        );
-
-
-        if (onUpdated) onUpdated(updatedData)
-        console.log("Update", transactions);
-        toast.success("Updated Success", {
-          duration: 3000,
-          position: "top-center",
-        })
-
-        onClose();
+      try {
+          const result = await updateTransactions(
+          transactions.id,
+          formData
+          );
+          
+        if (result) {
+            toast.success("Updated Success", {
+              duration: 3000,
+              position: "top-center",
+            })
+            onClose();
+        } else {
+          toast.error("Failed to update transaction", {
+            duration: 3000,
+            position: "top-center",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating transaction:", error);
+      } 
+      
     };
 
   return (
     <div>
-      <div className="p-4 border border-gray-200 shadow-md rounded bg-white shadow">
-        <h2 className="font-bold mb-3">Edit Transaksi</h2>
+      <div className="p-4 border border-gray-300  rounded-lg bg-white">
+        <h2 className="font-bold mb-3">Edit Transaksi {transactions.tanggal} / {transactions.type}</h2>
         <form onSubmit={handleSubmit}>
           <input
-            type="number"
+            type="text"
             name="nominal"
             value={formData.nominal.toLocaleString("id-ID")}
             onChange={handleChange}
             placeholder="Nominal"
-            className="border p-1 mb-2 w-full"
+            className="border border-gray-300 p-1 mb-2 w-full rounded"
           />
-          <input
-            type="text"
+
+          <select 
             name="kategori"
             value={formData.kategori}
             onChange={handleChange}
-            placeholder="Kategori"
-            className="border p-1 mb-2 w-full"
-          />
+            className="border border-gray-300 p-1 mb-2 w-full rounded"
+          >
+            <option value="">Pilih Kategori</option>
+            {categoryMap[transactions.type]?.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select> 
+
           <textarea
             name="catatan"
             value={formData.catatan}
             onChange={handleChange}
             placeholder="Catatan"
-            className="border p-1 mb-2 w-full"
+            className="border border-gray-300 p-1 mb-2 w-full rounded"
           />
+
           <div className="flex gap-2">
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
               Simpan
             </button>
-            <button type="button" onClick={onClose} className="bg-gray-300 px-4 py-2 rounded">
+            <button type="button" onClick={onClose} className="bg-gray-300 px-4 py-2 rounded cursor-pointer">
               Batal
             </button>
           </div>
