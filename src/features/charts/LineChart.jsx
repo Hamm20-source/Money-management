@@ -1,122 +1,142 @@
-import React, { useEffect, useState } from 'react';
-import { get, ref } from 'firebase/database';
-import { auth } from '../../utils/Firebase';
-import { database } from '../../utils/Firebase';
-import Chart from "react-apexcharts";
+import React, { useMemo } from "react";
+import useTransactionStore from "../../Store/UseTransactionStore";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// register
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
 
 const LineChart = () => {
-  const [monthlyExpense, setMonthlyExpense] = useState({});
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-     try {
-        const snapshot = await get(ref(database, `transactions/${user.uid}/expense`));
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-
-          // Ambil semua expense, lalu group by bulan
-          const grouped = {};
-
-          Object.values(data).forEach((item) => {
-            const amount = item.nominal || item.amount || 0;
-            const date = item.tanggal ? new Date(item.tanggal) : new Date(); // asumsi ada field `date`
-            const monthKey = `${date.getFullYear()} - ${String(date.getMonth() + 1).padStart(2, "0")}`;
-
-            if (!grouped[monthKey]) grouped[monthKey] = 0;
-            grouped[monthKey] += amount;
-          });
-
-          setMonthlyExpense(grouped);
-          console.log("Grouped Expense:", grouped);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
-  
+  const transactionData = useTransactionStore((state) => state.transactions);
+  const loading = useTransactionStore((state) => state.loading);
+ 
   const currentYear = new Date().getFullYear();
 
-  const months = Array.from({ length: 12}, (_, i) => {
+  const months = Array.from({ length: 12 }, (_, i) => {
     const month = String(i + 1).padStart(2, "0");
-    return `${currentYear} - ${month}`;
+    return `${currentYear}-${month}`;
   });
 
-  const dataValues = months.map((m) => monthlyExpense[m] || 0);
+  // ================== MAPPING DATA ==================
+  const monthlyExpense = useMemo(() => {
+   const result = {};
+    (transactionData).forEach((transaction) => {
+      if (transaction.type !== "expense") return;
+      const date = new Date(transaction.created_at);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      
+      if (!result[monthYear]) {
+        result[monthYear] = 0;
+      }
+      result[monthYear] += transaction.nominal;
+    });
+    return result;
+  }, [transactionData]);
+    
 
- const chartOptions = {
-  chart: {
-    type: "area",
-    toolbar: { 
-      show: true, 
-        tools: {
-          download: true,  // tombol download
-          selection: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true,
-          reset: true,
-      },
+  const dataValues = months.map((m) =>   
+    monthlyExpense[m] !== undefined ? monthlyExpense[m] : 0
+  );
 
-    },
-    dropShadow: {
-      enabled: true,
-      top: 8,
-      left: 2,
-      blur: 6,
-      opacity: 0.3,
-      color: "#d4291dff", // warna shadow sama dengan line
-    },
-  },
-    dataLabels: { enabled: false },
-    stroke: {
-      curve: "smooth",
-      width: 3, // bikin lebih tebal biar menyala
-      colors: ["#FF1744"], // neon red
-    },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shade: "dark",
-        type: "vertical",
-        shadeIntensity: 0.7,
-        gradientToColors: ["#e0574bff"], // gradasi merah ke pink
-        inverseColors: false,
-        opacityFrom: 0.9,
-        opacityTo: 0.3,
-        stops: [0, 100],
+  // DATA CHART (fix)
+  const chartData = {
+    labels: months,
+    datasets: [
+      {
+        label: "Pengeluaran per Bulan",
+        data: dataValues,
+        borderColor: "#FF1744",
+        backgroundColor: "rgba(255, 23, 68, 0.2)", // area fill
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+      },
+    ],
+  };
+
+  // OPTIONS
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        mode: "index",
+        intersect: false,
       },
     },
-    xaxis: {
-      categories: months,
-      labels: { style: { colors: "#555", fontWeight: 500 } },
+
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: "#999",
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { display: false },
+        ticks: {
+          color: "#666",
+        },
+      },
     },
-    yaxis: {
-      labels: { style: { colors: "#000000ff", fontWeight: 500 } },
-    },
-    tooltip: {
-      theme: "dark", // biar glow lebih terasa
+
+    elements: {
+      line: {
+        borderWidth: 3,
+      },
     },
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="animate-pulse text-lg font-semibold">Loading...</p>
+      </div>
+    );
+  };
 
-  const series = [
-    {
-      name: "Pengeluaran per Bulan",
-      data: dataValues,
-    },
-  ];
   return (
-    <div className='w-full p-3 mt-10 shadow-lg rounded'>
-      <h1 className='font-bold text-xl mb-5'>Pengeluaran Perbulan</h1>
-      <Chart series={series} options={chartOptions} height={400}/>
+    <div className="w-full min-w-0 flex flex-col space-y-4 mt-10">
+      <h1 className="font-semibold text-lg lg:text-xl mb-5">
+        Pengeluaran Berdasarkan Tahun {currentYear}
+      </h1>
+      <div className="w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
+        {transactionData.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-500 text-lg">
+              Belum ada data yang dimasukkan
+            </p>
+          </div>
+        ) : (
+          <div className="h-[300px] lg:h-[400px]">
+            <Line data={chartData} options={options} />
+          </div>
+        )}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default LineChart;
