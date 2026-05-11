@@ -26,7 +26,14 @@ export default function AddTransactions({ onSuccess }) {
     const categories = categoryMap[form.type] || [];    
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === "nominal") {
+            // Remove dots and parse as number for storage
+            const raw = value.replace(/\./g, "");
+            setForm({ ...form, nominal: raw ? Number(raw) : "" });
+        } else {
+            setForm({ ...form, [name]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -146,9 +153,9 @@ export default function AddTransactions({ onSuccess }) {
                 <div>
                     <label className="block text-sm font-medium">Nominal</label>
                     <input
-                    type="number"
+                    type="text"
                     name="nominal"
-                    value={form.nominal}
+                    value={form.nominal ? Number(form.nominal).toLocaleString("id-ID") : ""}
                     onChange={handleChange}
                     placeholder="Masukkan nominal"
                     className="w-full border px-2 py-1 rounded"
