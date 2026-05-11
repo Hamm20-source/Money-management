@@ -8,14 +8,14 @@ export default function AvatarChange({onSelect}) {
     const avatars = [Avatar1, Avatar2, Avatar3, Avatar4];
 
   return (
-    <div className='flex gap-20 justify-center items-center'>
+    <div className='flex flex-wrap md:flex-nowrap w-full gap-10 md:gap-20 justify-center items-center '>
         {avatars.map((img, i) => (
             <img
                 key={i}
                 src={img}
                 alt={`avatar-${i}`}
                 onClick={() => onSelect(img)}
-                className='w-40 h-40 rounded-full'
+                className='w-20 h-20 md:w-40 md:h-40 rounded-full'
             />
         ))}
     </div>
