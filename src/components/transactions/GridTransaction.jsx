@@ -1,120 +1,194 @@
-import React, { useEffect, useState } from "react";
-import { fetchExpense, fetchIncome } from "../../utils/Firebase";
-import Chart from "react-apexcharts";
+import React, { useMemo} from "react";
 import dayjs from "dayjs";
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 
-const GridTransaction = ({ uid }) => {
-  const [income, setIncome] = useState([]);
-  const [expense, setExpense] = useState([]);
-  const [total, setTotal] = useState({
-    income: 0,
-    expense: 0,
-    balance: 0,
-  });
+//Zustand Store component
+import useTransactionStore from "../../Store/UseTransactionStore";
 
-  useEffect(() => {
-    if (!uid) return;
+// register chart
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip);
 
-    fetchIncome(uid).then((data) => {
-      console.log("Income Data:", data);
-      setIncome(data);
-    });
+const GridTransaction = () => {
+  const transaction = useTransactionStore((state) => state.transactions);
+  const loading = useTransactionStore((state) => state.loading);
+ 
+  const parseNominal = (value) => {
+    if (value == null) return 0;
+    const cleaned = String(value).replace(/[^[0-9],-]/g, "").replace(/,/g, ".");
+    return Number(cleaned) || 0;
+  };
 
-    fetchExpense(uid).then((data) => {
-      console.log("Expense Data:", data);
-      setExpense(data);
-    });
-  }, [uid]);
+  // ================= TOTAL =================
+  const total = useMemo(() => {
+    const totalIncome = transaction
+      .filter((t) => t.type === "income")
+      .reduce((sum, t) => sum + parseNominal(t.nominal), 0);
 
-  useEffect(() => {
-    const totalIncome = income.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
-    const totalExpense = expense.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+    const totalExpense = transaction
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + parseNominal(t.nominal), 0);
 
-    setTotal({
+    return {
       income: totalIncome,
       expense: totalExpense,
       balance: totalIncome - totalExpense,
-    });
-  }, [income, expense]);
+    };
+  }, [transaction]);
 
-  // === MAPPING DATA PER HARI SELAMA 30 HARI TERAKHIR ===
-  const days = Array.from({ length: 30 }, (_, i) =>
-    dayjs().subtract(29 - i, "day").format("YYYY-MM-DD")
+  // ================= DATE RANGE (30 HARI) =================
+  const days = useMemo(
+    () =>
+      Array.from({ length: 30 }, (_, i) =>
+        dayjs().subtract(29 - i, "day").format("YYYY-MM-DD")
+      ),
+    []
   );
 
-  const mapToDaily = (data) => {
-    return days.map((day) => {
-      const sum = data
-        .filter((item) => item.tanggal === day)
-        .reduce((acc, cur) => acc + (Number(cur.nominal) || 0), 0);
-      return sum;
+  const labels = useMemo(
+    () => days.map((d) => dayjs(d).format("DD")),
+    [days]
+  );
+
+  // ================= MAPPING DATA =================
+  const normalizeDate = (value) => {
+    const date = dayjs(value);
+    return date.isValid() ? date.format("YYYY-MM-DD") : null;
+  };
+
+  const { incomeSeries, expenseSeries, balanceSeries } = useMemo(() => {
+    const incomeByDay = new Map(days.map((day) => [day, 0]));
+    const expenseByDay = new Map(days.map((day) => [day, 0]));
+
+    transaction.forEach((item) => {
+      const day = normalizeDate(item.tanggal);
+      if (!day || !incomeByDay.has(day)) return;
+
+      const nominal = parseNominal(item.nominal);
+      if (item.type === "income") {
+        incomeByDay.set(day, incomeByDay.get(day) + nominal);
+      } else if (item.type === "expense") {
+        expenseByDay.set(day, expenseByDay.get(day) + nominal);
+      }
     });
+
+    const incomeSeries = days.map((day) => incomeByDay.get(day) || 0);
+    const expenseSeries = days.map((day) => expenseByDay.get(day) || 0);
+    const balanceSeries = incomeSeries.reduce((acc, inc, idx) => {
+      const prevBalance = idx === 0 ? 0 : acc[idx - 1];
+      acc.push(prevBalance + inc - expenseSeries[idx]);
+      return acc;
+    }, []);
+
+    return { incomeSeries, expenseSeries, balanceSeries };
+  }, [transaction, days]);
+
+  // ================= CHART CONFIG =================
+  const createChartData = (label, data, color) => ({
+    labels,
+    datasets: [
+      {
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: color + "33",
+        tension: 0.4,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        hitRadius: 10,
+        borderWith: 2,
+      },
+    ],
+  });
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const val = ctx.raw;
+            return `Rp${Number(val).toLocaleString("id-ID")}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: { display: false },
+      y: { display: false },
+    },
   };
 
-  const incomeSeries = mapToDaily(income);
-  const expenseSeries = mapToDaily(expense);
-  const balanceSeries = incomeSeries.map((val, i) => val - (expenseSeries[i] || 0));
+  // ================= LOADING =================
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="animate-pulse text-lg font-semibold">
+          Loading...
+        </p>
+      </div>
+    );
+  }
 
-  const baseOptions = {
-    chart: { type: "line", sparkline: { enabled: true } },
-    stroke: { curve: "smooth", width: 3 },
-    tooltip: {
-      y: { 
-        formatter: (val) => {
-          const formatted = Math.abs(val).toLocaleString("id-ID");
-          return (val < 0 ?  `- Rp${formatted}` : `Rp${formatted}`)
-        }
-       },
-    },
-    xaxis: {
-      categories: days.map((d) => dayjs(d).format("DD")), // cuma hari doang biar singkat
-    },
-  };
+  // ================= NO DATA =================
+  if (transaction.length === 0) {
+    return (
+      <div className="mt-5">
+        <h1 className="font-semibold text-xl mb-5">Ringkasan Bulanan</h1>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-500 text-lg">
+            Belum ada data yang dimasukkan
+          </p>
+        </div>
+      </div>
+    );
+  }
 
+  // ================= UI =================
   return (
     <div className="mt-5">
-      <h1 className="font-bold text-xl mb-5">Ringkasan Bulanan</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 font-semibold space-y-4 md:space-y-0">
-        
-        {/* Saldo */}
-        <div className="p-4 w-full shadow-lg rounded space-y-6">
-          <h2 className="font-bold">Total Saldo</h2>
-          <p>Rp{total.balance.toLocaleString()}</p>
-          <Chart
-            options={{ ...baseOptions, colors: ["#2196F3"] }}
-            series={[{ name: "Saldo", data: balanceSeries }]}
-            type="line"
-            height={100}
+      <h1 className="font-semibold text-xl mb-5">Ringkasan Bulanan</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {/* SALDO */}
+        <div className="p-4 shadow-lg rounded space-y-4">
+          <h2 className="font-semibold">Total Saldo</h2>
+          <p>Rp{total.balance.toLocaleString("id-ID")}</p>
+          <Line
+            data={createChartData("Saldo", balanceSeries, "#2196F3")}
+            options={options}
           />
         </div>
 
-        {/* Pengeluaran */}
-        <div className="p-4 w-full shadow-lg rounded space-y-6">
-          <h2 className="font-bold">
-            Pengeluaran
-          </h2>
-          <p>Rp{total.expense.toLocaleString()}</p>
-          <Chart
-            options={{ ...baseOptions, colors: ["#F44336"] }}
-            series={[{ name: "Pengeluaran", data: expenseSeries }]}
-            type="line"
-            height={100}
+        {/* EXPENSE */}
+        <div className="p-4 shadow-lg rounded space-y-4">
+          <h2 className="font-semibold">Pengeluaran</h2>
+          <p>Rp{total.expense.toLocaleString("id-ID")}</p>
+          <Line
+            data={createChartData("Expense", expenseSeries, "#F44336")}
+            options={options}
           />
         </div>
 
-        {/* Pemasukan */}
-        <div className="p-4 w-full shadow-lg rounded space-y-6">
-          <h2 className="font-bold">
-            Pemasukan
-          </h2>
-          <p>Rp{total.income.toLocaleString()}</p>
-          <Chart
-            options={{ ...baseOptions, colors: ["#4CAF50"] }}
-            series={[{ name: "Pemasukan", data: incomeSeries }]}
-            type="line"
-            height={100}
+        {/* INCOME */}
+        <div className="p-4 shadow-lg rounded space-y-4">
+          <h2 className="font-semibold">Pemasukan</h2>
+          <p>Rp{total.income.toLocaleString("id-ID")}</p>
+          <Line
+            data={createChartData("Income", incomeSeries, "#4CAF50")}
+            options={options}
           />
         </div>
+
       </div>
     </div>
   );
