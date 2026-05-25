@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Logo from '../assets/Prototype Money Management/Logo-2.png';
+import Logo from '../assets/Prototype Money Management/Transparant_Logo.png';
 import { BiExit } from 'react-icons/bi';
 import { GiHamburgerMenu } from 'react-icons/gi';
 import { CgClose } from 'react-icons/cg';
+import { supabase } from '../utils/supabase';
 
 export default function Sidebar({ user }) {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Sidebar({ user }) {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
         localStorage.removeItem("avatar");
+        supabase.auth.signOut();
         navigate('/guest');
     };
 
@@ -28,7 +30,10 @@ export default function Sidebar({ user }) {
 
         {/* Logo */}
         <Link to="/">
-          <img src={Logo} alt="logo" className="w-24 mb-10" />
+        <div className='flex flex-col mb-10'>
+          <img src={Logo} alt="logo" className="w-24" />
+          <span className='ml-5 text-xl font-semibold'>SiKeu</span>
+        </div>
         </Link>
 
         {/* Menu */}
@@ -49,6 +54,7 @@ export default function Sidebar({ user }) {
 
           <button
             onClick={buttonLogout}
+            aria-label="Logout"
             className="flex items-center gap-2 text-red-500 hover:underline"
           >
             Logout <BiExit />
@@ -60,7 +66,7 @@ export default function Sidebar({ user }) {
 
       <div className="lg:hidden h-full">
         <div className="flex items-center p-5">
-              <button onClick={() => setOpen(true)}>
+              <button onClick={() => setOpen(true)} aria-label="Menu">
                   <GiHamburgerMenu className='text-xl'/>
               </button>
 
@@ -69,7 +75,10 @@ export default function Sidebar({ user }) {
                   ${open ? "translate-x-0" : "-translate-x-full"} lg:hidden`}>
                       <div className='flex justify-between items-center'>
                           <Link to="/">
-                              <img src={Logo} alt="logo" className='w-15' />
+                              <div className='flex flex-col'>
+                                  <img src={Logo} alt="logo" className="w-24" />
+                                  <span className='ml-5 text-sm font-semibold'>SiKeu</span>
+                              </div>
                           </Link>
                           <button onClick={() => setOpen(false)} className='cursor-pointer'>
                               <CgClose className='text-xl '/>
@@ -89,6 +98,7 @@ export default function Sidebar({ user }) {
                           <button 
                               className='flex items-center gap-2 text-red-500 hover:underline'
                               onClick={buttonLogout}
+                              aria-label="Logout"
                           >
                               Logout <BiExit/>
                           </button>
