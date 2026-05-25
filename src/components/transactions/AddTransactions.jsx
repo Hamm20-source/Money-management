@@ -11,6 +11,7 @@ export default function AddTransactions({ onSuccess }) {
 
     const [form, setForm] = useState({
             type: 'income',
+            account: "",
             tanggal: "",
             kategori: "",
             nominal: "",
@@ -23,7 +24,33 @@ export default function AddTransactions({ onSuccess }) {
         expense: ["Makanan", "Transportasi", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"]
     };
 
-    const categories = categoryMap[form.type] || [];    
+    //Mapping Jenis Account Transaksi
+    const accountOptions = [ 
+        "Cash",
+        
+        // Bank
+        "BCA",
+        "BRI",
+        "BNI",
+        "Mandiri",
+        "CIMB Niaga",
+        "BTN",
+        "Permata Bank",
+        "Bank Jago",
+        "SeaBank",
+        "Jenius",
+        "Neo Bank",
+
+        // E-Wallet
+        "Dana",
+        "GoPay",
+        "OVO",
+        "ShopeePay",
+        "LinkAja",
+    ];
+
+    const categories = categoryMap[form.type] || [];   
+    const accounts = accountOptions;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -46,7 +73,7 @@ export default function AddTransactions({ onSuccess }) {
             })
 
             toast.success("Transaksi berhasil ditambahkan");
-            setForm({ type: 'income', tanggal: "", kategori: "", nominal: "", catatan: "" });
+            setForm({ type: 'income', account: "", tanggal: "", kategori: "", nominal: "", catatan: "" });
             setOpen(false);
 
             onSuccess?.();
@@ -60,137 +87,148 @@ export default function AddTransactions({ onSuccess }) {
     const isIncome = form.type === 'income';
 
     return (
-        <>
+    <>
         <Toaster position="top-right" />
 
-        {/* BUTTON */}
         <button
             onClick={() => setOpen(true)}
             className="flex items-center gap-2 bg-black font-semibold text-white text-sm px-4 py-1 rounded-lg cursor-pointer"
+            aria-label="Tambah Tranasaksi"
         >
             <BiAddToQueue />
             Tambah Transaksi
         </button>
 
-        {/* MODAL */}
         {open && (
-            <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
-            <div className="relative bg-white p-8 rounded-xl w-[400px]">
+            <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50 p-5">
+                <div className="relative bg-white p-8 rounded-xl w-[400px]">
 
-                {/* CLOSE */}
-                <button
-                onClick={() => setOpen(false)}
-                className="absolute top-3 right-3"
-                >
-                <CgClose />
-                </button>
-
-                {/* TITLE */}
-                <h2
-                className={`text-center font-bold py-2 rounded-lg mb-6 ${
-                    isIncome ? "bg-green-400" : "bg-red-400"
-                }`}
-                >
-                {isIncome ? "Tambah Pemasukan" : "Tambah Pengeluaran"}
-                </h2>
-
-                {/* FORM */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-                {/* TYPE */}
-                <div>
-                    <label className="block text-sm font-medium">Tipe</label>
-                    <select
-                    name="type"
-                    value={form.type}
-                    onChange={(e) =>
-                        setForm({
-                        ...form,
-                        type: e.target.value,
-                        kategori: "" // reset kategori
-                        })
-                    }
-                    className="w-full border px-2 py-1 rounded"
+                    <button
+                        onClick={() => setOpen(false)}
+                        className="absolute top-3 right-3"
+                        aria-label="Icon Close"
                     >
-                    <option value="income">Pemasukan</option>
-                    <option value="expense">Pengeluaran</option>
-                    </select>
-                </div>
+                    <CgClose />
+                    </button>
 
-                {/* TANGGAL */}
-                <div>
-                    <label className="block text-sm font-medium">Tanggal</label>
-                    <input
-                    type="date"
-                    name="tanggal"
-                    value={form.tanggal}
-                    onChange={handleChange}
-                    className="w-full border px-2 py-1 rounded"
-                    required
-                    />
-                </div>
-
-                {/* KATEGORI */}
-                <div>
-                    <label className="block text-sm font-medium">Kategori</label>
-                    <select
-                    name="kategori"
-                    value={form.kategori}
-                    onChange={handleChange}
-                    className="w-full border px-2 py-1 rounded"
-                    required
-                    >
-                    <option value="">Pilih Kategori</option>
-                    {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                        {cat}
-                        </option>
-                    ))}
-                    </select>
-                </div>
-
-                {/* NOMINAL */}
-                <div>
-                    <label className="block text-sm font-medium">Nominal</label>
-                    <input
-                    type="text"
-                    name="nominal"
-                    value={form.nominal ? Number(form.nominal).toLocaleString("id-ID") : ""}
-                    onChange={handleChange}
-                    placeholder="Masukkan nominal"
-                    className="w-full border px-2 py-1 rounded"
-                    required
-                    />
-                </div>
-
-                {/* CATATAN */}
-                <div>
-                    <label className="block text-sm font-medium">Catatan</label>
-                    <input
-                    type="text"
-                    name="catatan"
-                    value={form.catatan}
-                    onChange={handleChange}
-                    placeholder="Opsional"
-                    className="w-full border px-2 py-1 rounded"
-                    />
-                </div>
-
-                {/* SUBMIT */}
-                <button
-                    type="submit"
-                    className={`mt-3 py-2 rounded-lg font-semibold  border-2 border-gray-400 transition-all duration-300 cursor-pointer ${
-                    isIncome ? "hover:bg-green-200" : "hover:bg-red-200"
+                    <h2
+                    className={`text-center font-bold py-2 rounded-lg mb-6 ${
+                        isIncome ? "bg-green-400" : "bg-red-400"
                     }`}
-                >
-                    Simpan
-                </button>
+                    >
+                    {isIncome ? "Tambah Pemasukan" : "Tambah Pengeluaran"}
+                    </h2>
 
-                </form>
-            </div>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+                    <div>
+                        <label className="block text-sm font-medium">Tipe</label>
+                        <select
+                            name="type"
+                            value={form.type}
+                            onChange={(e) =>
+                                setForm({
+                                ...form,
+                                type: e.target.value,
+                                kategori: "" // reset kategori
+                                })
+                            }
+                            className="w-full border px-2 py-1 rounded"
+                        >
+                        <option value="income">Pemasukan</option>
+                        <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium">Tanggal</label>
+                        <input
+                            type="date"
+                            name="tanggal"
+                            value={form.tanggal}
+                            onChange={handleChange}
+                            className="w-full border px-2 py-1 rounded"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium">Kategori</label>
+                        <select
+                            name="kategori"
+                            value={form.kategori}
+                            onChange={handleChange}
+                            className="w-full border px-2 py-1 rounded"
+                            required
+                        >
+                            <option value="">Pilih Kategori</option>
+                                {categories.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Tipe Akun</label>
+                        <select 
+                            name="account"
+                            value={form.account}
+                            onChange={handleChange}
+                            className="w-full border px-2 py-1 rounded"
+                            offset={-50}
+                            required
+                        >
+                            <option value="">Pilih Tipe Akun</option>
+                                {accounts.map((acc) => (
+                                    <option key={acc} value={acc}>
+                                        {acc}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium">Nominal</label>
+                        <input
+                            type="text"
+                            name="nominal"
+                            value={form.nominal ? Number(form.nominal).toLocaleString("id-ID") : ""}
+                            onChange={handleChange}
+                            placeholder="Masukkan nominal"
+                            className="w-full border px-2 py-1 rounded"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium">Catatan</label>
+                        <input
+                            type="text"
+                            name="catatan"
+                            value={form.catatan}
+                            onChange={handleChange}
+                            placeholder="Opsional"
+                            className="w-full border px-2 py-1 rounded"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className={`mt-3 py-2 rounded-lg font-semibold  border-2 border-gray-400 transition-all duration-300 cursor-pointer ${
+                        isIncome ? "hover:bg-green-200" : "hover:bg-red-200"
+                        }`}
+                        aria-label="Simpan"
+                    >
+                        Simpan
+                    </button>
+
+                    </form>
+                </div>
             </div>
         )}
-        </>
+    </>
     );
 
 }
