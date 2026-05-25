@@ -9,12 +9,37 @@ export default function EditingTransactionsForm  ({ transactions, onClose })  {
         nominal: transactions.nominal || 0,
         kategori: transactions.kategori || "",
         catatan: transactions.catatan || "",
+        account: transactions.account || "",
     });
 
     const categoryMap = {
         income: ["Gaji", "Bonus", "Investasi", "Hadiah", "Penjualan", "Lainnya"],
         expense: ["Makanan", "Transportasi", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"]
     };
+
+    const accountOptions = [ 
+        "Cash",
+        
+        // Bank
+        "BCA",
+        "BRI",
+        "BNI",
+        "Mandiri",
+        "CIMB Niaga",
+        "BTN",
+        "Permata Bank",
+        "Bank Jago",
+        "SeaBank",
+        "Jenius",
+        "Neo Bank",
+
+        // E-Wallet
+        "Dana",
+        "GoPay",
+        "OVO",
+        "ShopeePay",
+        "LinkAja",
+    ];
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -80,6 +105,18 @@ export default function EditingTransactionsForm  ({ transactions, onClose })  {
             <option value="">Pilih Kategori</option>
             {categoryMap[transactions.type]?.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select> 
+
+          <select 
+            name="account"
+            value={formData.account}
+            onChange={handleChange}
+            className="border border-gray-300 p-1 mb-2 w-full rounded"
+          >
+            <option value="">Pilih Akun</option>
+            {accountOptions.map((acc) => (
+              <option key={acc} value={acc}>{acc}</option>
             ))}
           </select> 
 
