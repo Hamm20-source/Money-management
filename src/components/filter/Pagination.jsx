@@ -12,6 +12,7 @@ export default function Pagination({ currentPage, totalPages, onNext, onPrev }) 
                 :
                 "bg-black cursor-pointer"
             }`}
+            aria-label='Prev'
         >
             Prev
         </button>
@@ -29,6 +30,7 @@ export default function Pagination({ currentPage, totalPages, onNext, onPrev }) 
                 :
                 "bg-black cursor-pointer"
             }`}
+            aria-label='Next'
         >
             Next
         </button>
