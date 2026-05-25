@@ -18,7 +18,6 @@ ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip)
 
 const GridTransaction = () => {
   const transaction = useTransactionStore((state) => state.transactions);
-  const loading = useTransactionStore((state) => state.loading);
  
   const parseNominal = (value) => {
     if (value == null) return 0;
@@ -128,68 +127,48 @@ const GridTransaction = () => {
     },
   };
 
-  // ================= LOADING =================
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="animate-pulse text-lg font-semibold">
-          Loading...
-        </p>
-      </div>
-    );
-  }
-
-  // ================= NO DATA =================
-  if (transaction.length === 0) {
-    return (
-      <div className="mt-5">
-        <h1 className="font-semibold text-xl mb-5">Ringkasan Bulanan</h1>
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-500 text-lg">
-            Belum ada data yang dimasukkan
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ================= UI =================
   return (
     <div className="mt-5">
       <h1 className="font-semibold text-xl mb-5">Ringkasan Bulanan</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* SALDO */}
-        <div className="p-4 shadow-lg rounded space-y-4">
-          <h2 className="font-semibold">Total Saldo</h2>
-          <p>Rp{total.balance.toLocaleString("id-ID")}</p>
-          <Line
-            data={createChartData("Saldo", balanceSeries, "#2196F3")}
-            options={options}
-          />
+      {transaction.length === 0 ? (
+        <div className="flex justify-center items-center h-64 w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
+          <p className="text-gray-500 text-lg">
+            Belum ada data yang dimasukkan
+          </p>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
-        {/* EXPENSE */}
-        <div className="p-4 shadow-lg rounded space-y-4">
-          <h2 className="font-semibold">Pengeluaran</h2>
-          <p>Rp{total.expense.toLocaleString("id-ID")}</p>
-          <Line
-            data={createChartData("Expense", expenseSeries, "#F44336")}
-            options={options}
-          />
+          <div className="p-4 shadow-lg rounded space-y-4">
+            <h2 className="font-semibold">Total Saldo</h2>
+            <p>Rp{total.balance.toLocaleString("id-ID")}</p>
+            <Line
+              data={createChartData("Saldo", balanceSeries, "#2196F3")}
+              options={options}
+            />
+          </div>
+
+          <div className="p-4 shadow-lg rounded space-y-4">
+            <h2 className="font-semibold">Pengeluaran</h2>
+            <p>Rp{total.expense.toLocaleString("id-ID")}</p>
+            <Line
+              data={createChartData("Expense", expenseSeries, "#F44336")}
+              options={options}
+            />
+          </div>
+
+          <div className="p-4 shadow-lg rounded space-y-4">
+            <h2 className="font-semibold">Pemasukan</h2>
+            <p>Rp{total.income.toLocaleString("id-ID")}</p>
+            <Line
+              data={createChartData("Income", incomeSeries, "#4CAF50")}
+              options={options}
+            />
+          </div>
+
         </div>
-
-        {/* INCOME */}
-        <div className="p-4 shadow-lg rounded space-y-4">
-          <h2 className="font-semibold">Pemasukan</h2>
-          <p>Rp{total.income.toLocaleString("id-ID")}</p>
-          <Line
-            data={createChartData("Income", incomeSeries, "#4CAF50")}
-            options={options}
-          />
-        </div>
-
-      </div>
+      )}
     </div>
   );
 };
