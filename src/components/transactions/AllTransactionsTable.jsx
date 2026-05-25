@@ -100,6 +100,7 @@ export default function AllTransactionsTable() {
                     <th className="px-4 py-2 border-b">Tanggal</th>
                     <th className="px-4 py-2 border-b">Tipe</th>
                     <th className="px-4 py-2 border-b">Kategori</th>
+                    <th className="px-4 py-2 border-b">Akun</th>
                     <th className="px-4 py-2 border-b">Nominal</th>
                     <th className="px-4 py-2 border-b">Catatan</th>
                     <th className="px-4 py-2 border-b">Update</th>
@@ -114,18 +115,25 @@ export default function AllTransactionsTable() {
                           <td className="border-t border-b border-gray-300 text-xs lg:text-base">{t.tanggal}</td>
                           <td className="border-t border-b border-gray-300 text-xs lg:text-base">{t.type}</td>
                           <td className="border-t border-b border-b-gray-300 text-xs lg:text-base">{t.kategori}</td>
+                          <td className="border-t border-b border-gray-300 text-xs lg:text-base">{t.account || "-"}</td>
                           <td className={`border-t border-b border-gray-300 text-xs lg:text-base ${t.type === "income" ? "text-green-500" : "text-red-500"}`}>
                             {t.type === "income" ? "+" : "-"} {" "}
                             Rp{(t.nominal || 0).toLocaleString("id-ID")}
                           </td>
                           <td className="border-t border-b border-gray-300 text-xs lg:text-base">{t.catatan || "-"}</td>
                           <td className="border-t border-b border-gray-300 text-xs lg:text-base">
-                            <button className="text center cursor-pointer" onClick={() => setEditingTransactions(t)}>
+                            <button className="text center cursor-pointer" 
+                              onClick={() => setEditingTransactions(t)}
+                              aria-label='update'
+                            >
                                 <GrUpdate className='text-xs lg:text-base'/>
                             </button>
                           </td>
                           <td className="border-t border-r border-b border-gray-300 ">
-                            <button className="text-center cursor-pointer" onClick={() => setTransactionsDelete(t)}>
+                            <button className="text-center cursor-pointer" 
+                              onClick={() => setTransactionsDelete(t)}
+                              aria-label='trash'
+                            >
                                <BiTrash className='text-xs lg:text-base'/>
                             </button>
                           </td>
