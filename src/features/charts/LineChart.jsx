@@ -25,8 +25,6 @@ ChartJS.register(
 
 const LineChart = () => {
   const transactionData = useTransactionStore((state) => state.transactions);
-  const loading = useTransactionStore((state) => state.loading);
- 
   const currentYear = new Date().getFullYear();
 
   const months = Array.from({ length: 12 }, (_, i) => {
@@ -109,32 +107,24 @@ const LineChart = () => {
     },
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="animate-pulse text-lg font-semibold">Loading...</p>
-      </div>
-    );
-  };
-
   return (
     <div className="w-full min-w-0 flex flex-col space-y-4 mt-10">
       <h1 className="font-semibold text-lg lg:text-xl mb-5">
         Pengeluaran Berdasarkan Tahun {currentYear}
       </h1>
-      <div className="w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
         {transactionData.length === 0 ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center h-64 w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
             <p className="text-gray-500 text-lg">
               Belum ada data yang dimasukkan
             </p>
           </div>
         ) : (
-          <div className="h-[300px] lg:h-[400px]">
-            <Line data={chartData} options={options} />
+          <div className="w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
+            <div className="h-[300px] lg:h-[400px]">
+              <Line data={chartData} options={options} />
+            </div>
           </div>
         )}
-      </div>
     </div>
   );
 };
