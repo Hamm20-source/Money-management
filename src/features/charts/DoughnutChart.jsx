@@ -12,7 +12,6 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DoughnutChart = () => {
   const transactions = useTransactionStore((state) => state.transactions);
-  const loading = useTransactionStore((state) => state.loading);
 
 
   const summary = useMemo(() => {
@@ -31,15 +30,6 @@ const DoughnutChart = () => {
 
     return { income, expense };
   }, [transactions]);
-  
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-80">
-        <p className="animate-pulse text-lg font-semibold">Loading...</p>
-      </div>
-    );
-  };
 
 
   // DATA
@@ -78,21 +68,21 @@ const DoughnutChart = () => {
       <h1 className="font-semibold text-lg lg:text-xl mb-5">
         Perbadingan Pemasukan & Pengeluaran
       </h1>
-      <div className="w-full  p-5 shadow-2xl border border-gray-300 rounded-lg">
 
       {transactions.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-64 w-full p-5 shadow-2xl border border-gray-300 rounded-lg">
           <p className="text-gray-500 text-lg">
             Belum ada data yang dimasukkan
           </p>
         </div>
       ) : ( 
-        <div className="h-[300px] lg:h-[400px] flex justify-center ">
-          <Doughnut data={data} options={options} />
+        <div className="w-full  p-5 shadow-2xl border border-gray-300 rounded-lg">
+          <div className="h-[300px] lg:h-[400px] flex justify-center ">
+            <Doughnut data={data} options={options} />
+          </div>
         </div>
       )}
       
-      </div>
     </div>
   );
 };
