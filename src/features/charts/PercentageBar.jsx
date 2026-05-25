@@ -3,8 +3,7 @@ import useTransactionStore from "../../Store/UseTransactionStore";
 
 const PercentageBar = () => {
     const transactionData = useTransactionStore((state) => state.transactions);
-    const loading = useTransactionStore((state) => state.loading);
-
+    
     const expensStats = useMemo(() => {
         const now = new Date();
         const currentMonth = now.getMonth();
@@ -68,14 +67,6 @@ const PercentageBar = () => {
         dataValues.push(monthlyExpense[key] || 0);
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-32">
-                <p className="animate-pulse text-lg font-semibold">Loading...</p>
-            </div>
-        );
-    }
-
     // Calculate progress percentage (current vs last month)
     const targetAmount = expensStats.lastTotal;
     const currentAmount = expensStats.currentTotal;
@@ -87,48 +78,58 @@ const PercentageBar = () => {
     lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     
     return (
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div>
             <h3 className="text-lg font-semibold mb-4">Perbandingan Pengeluaran Bulan Ini</h3>
-            
-            <div className="space-y-4">
-                {/* Progress Bar */}
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span>Bulanan ({currentMonthName})</span>
-                        <span>{progressPercentage.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div 
-                            className="bg-red-500 h-3 rounded-full transition-all duration-300"
-                            style={{ width: `${progressPercentage}%` }}
-                        ></div>
-                    </div>
-                </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="text-center">
-                        <p className="text-gray-600">Bulan Ini</p>
-                        <p className="font-semibold text-red-600">
-                            Rp{currentAmount.toLocaleString("id-ID")}
-                        </p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-gray-600">Bulan Lalu</p>
-                        <p className="font-semibold text-gray-800">
-                            Rp{targetAmount.toLocaleString("id-ID")}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Percentage Change */}
-                <div className="text-center">
-                    <p className="text-sm text-gray-600">Perubahan</p>
-                    <p className={`font-semibold ${expensStats.percentageChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {expensStats.percentageChange >= 0 ? '+' : ''}{expensStats.percentageChange.toFixed(1)}%
+            {transactionData.length === 0 ? (
+                <div className="flex justify-center items-center h-64 bg-white p-6 border border-gray-300 rounded-lg shadow-2xl">
+                    <p className="text-gray-500 text-lg">
+                         Belum ada data yang dimasukkan
                     </p>
                 </div>
-            </div>
+            ) : (
+                <div className="bg-white p-6 border border-gray-300 rounded-lg shadow-2xl">
+                    <div className="space-y-4">
+                        {/* Progress Bar */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span>Bulanan ({currentMonthName})</span>
+                                <span>{progressPercentage.toFixed(1)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-3">
+                                <div 
+                                    className="bg-red-500 h-3 rounded-full transition-all duration-300"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="text-center">
+                                <p className="text-gray-600">Bulan Ini</p>
+                                <p className="font-semibold text-red-600">
+                                    Rp{currentAmount.toLocaleString("id-ID")}
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-gray-600">Bulan Lalu</p>
+                                <p className="font-semibold text-gray-800">
+                                    Rp{targetAmount.toLocaleString("id-ID")}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Percentage Change */}
+                        <div className="text-center">
+                            <p className="text-sm text-gray-600">Perubahan</p>
+                            <p className={`font-semibold ${expensStats.percentageChange >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                {expensStats.percentageChange >= 0 ? '+' : ''}{expensStats.percentageChange.toFixed(1)}%
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
