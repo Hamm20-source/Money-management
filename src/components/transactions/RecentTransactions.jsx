@@ -13,7 +13,6 @@ import { BiTrash } from "react-icons/bi";
 export default function RecentTransactions() {
   const {
     transactions,
-    loading, 
     addTransactions,
     updateTransactions,
     deleteTransactions
@@ -25,16 +24,21 @@ export default function RecentTransactions() {
   const latestTransactions = [...transactions]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0,3)
+
+  const handleDeleteClick = (e) => {
+    const id =  e.currentTarget.dataset.id;
+    setTransactionToDelete(transactions.find((t) => t.id === id));
+  };
+
+  const handleUpdateClick = (e) => {
+    const id = e.currentTarget.dataset.id;
+    const transaction = transactions.find((t) => t.id === id);
+    setEditingTransactions(transaction);
+  };
+
+  const trashIcon = <BiTrash  className="text-xs lg:text-base" />;
+  const updateIcon = <GrUpdate className="text-xs lg:text-base" />
   
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-screen">
-          <p className="animate-pulse text-lg font-semibold">Loading...</p>
-        </div>
-      )
-    };
-
-
 
   return (
     <div>
@@ -55,6 +59,7 @@ export default function RecentTransactions() {
                   <th className="px-4 py-2 border-b font-semibold">Tanggal</th>
                   <th className="px-4 py-2 border-b font-semibold">Tipe</th>
                   <th className="px-4 py-2 border-b font-semibold">Kategori</th>
+                  <th className="px-4 py-2 border-b font-semibold">Akun</th>
                   <th className="px-4 py-2 border-b font-semibold">Nominal</th>
                   <th className="px-4 py-2 border-b font-semibold">Catatan</th>
                   <th className="px-4 py-2 border-b font-semibold">Update</th>
@@ -68,6 +73,7 @@ export default function RecentTransactions() {
                         <td className="border-t border-t-gray-300 text-xs lg:text-base">{t.tanggal}</td>
                         <td className="border-t border-t-gray-300 text-xs lg:text-base">{t.type}</td>
                         <td className="border-t border-t-gray-300 text-xs lg:text-base">{t.kategori}</td>
+                        <td className="border-t border-t-gray-300 text-xs lg:text-base">{t.account || "-"}</td>
                         <td className={`border-t border-t-gray-300 text-xs lg:text-base  ${t.type === "income" ? "text-green-500" : "text-red-500"}`}>
                           {t.type === "income" ? "+" : "-"} {" "}
                           Rp{(t.nominal || 0).toLocaleString("id-ID")}
@@ -75,14 +81,20 @@ export default function RecentTransactions() {
                         <td className="border-t border-t-gray-300 text-xs lg:text-base">{t.catatan || "-"}</td>
                         <td className="border-t border-t-gray-300 text-xs lg:text-base  ">
                           <button className="text center cursor-pointer" 
-                              onClick={() => setEditingTransactions(t)} 
+                              onClick={handleUpdateClick}
+                              data-id={t.id} 
+                              aria-label="update"
                           >
-                            <GrUpdate className="text-xs lg:text-xl" />
+                              {updateIcon}
                           </button>
                         </td>
                         <td className="border-t border-t-gray-300">
-                          <button className="text-center cursor-pointer" onClick={() => setTransactionToDelete(t)}>
-                              <BiTrash className="text-xs lg:text-xl"/>
+                          <button className="text-center cursor-pointer" 
+                            onClick={handleDeleteClick}  
+                            data-id={t.id}
+                            aria-label="delete"
+                          >
+                              {trashIcon}
                           </button>
                         </td>
                       </tr>
